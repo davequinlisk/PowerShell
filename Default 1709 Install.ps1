@@ -1,5 +1,5 @@
-﻿# Configure IP Addressing
-Rename-Computer VMNAme
+# Configure IP Addressing
+Rename-Computer VMname
 shutdown /r
 New-NetIPAddress -InterfaceAlias "Ethernet" -IPAddress "172.16.0.1" -PrefixLength 24 -DefaultGateway 172.16.0.254
 Set-DnsClientServerAddress -InterfaceIndex 2 -ServerAddresses 172.16.0.1
@@ -9,7 +9,7 @@ Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server" 
 Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
 
 #Join Domain
-Add-Computer -DomainName Quinlisk.int -Credential QUINLISK\Administrator -Reboot 
+Add-Computer -DomainName Domain.com -Credential DOMAIN\Administrator -Reboot 
 
 #Correct IP Addressing
 Remove-NetIPAddress -IPAddress 172.16.0.1
@@ -25,8 +25,8 @@ Install-WindowsFeature DNS
 Install-ADDSForest
 -DatabasePath “C:\Windows\NTDS”
 -DomainMode “Win2012R2”
--DomainName “yourdomain.com”
--DomainNetbiosName “YOURDOMAIN”
+-DomainName “domain.com”
+-DomainNetbiosName “DOMAIN”
 -ForestMode “Win2012R2”
 -InstallDns:$true
 -LogPath “C:\Windows\NTDS”
@@ -35,6 +35,6 @@ Install-ADDSForest
 -Force:$true
 
 #Configure DNS Resource Records
-Get-DnsServerZone -ZoneName "quinlisk.int" | Get-DnsServerResourceRecord
-Add-DnsServerResourceRecordA -Name "vcsa01" -ZoneName "quinlisk.int" -AllowUpdateAny -IPv4Address "172.16.0.10" -TimeToLive 01:00:00
-Remove-DnsServerResourceRecord -ZoneName "quinlisk.int" -RRType "A" -Name "vcsa01" -RecordData "172.16.0.10"
+Get-DnsServerZone -ZoneName "domain.com" | Get-DnsServerResourceRecord
+Add-DnsServerResourceRecordA -Name "vcsa01" -ZoneName "domain.com" -AllowUpdateAny -IPv4Address "172.16.0.10" -TimeToLive 01:00:00
+Remove-DnsServerResourceRecord -ZoneName "domain.com" -RRType "A" -Name "vcsa01" -RecordData "172.16.0.10"
