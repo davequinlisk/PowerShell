@@ -8,6 +8,11 @@ Set-DnsClientServerAddress -InterfaceIndex 2 -ServerAddresses 172.16.0.1
 Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server" -Name "fdenyTSXonnections" -Value 0
 Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
 
+#Apply Windows Updates
+$AvailableUpdates = Start-WUScan -SearchCriteria "IsInstalled=0 AND IsHidden=0 AND IsAssigned=1"
+Write-Host "Updates found: " $AvailableUpdates.Count
+Install-WUUpdates -Updates $AvailableUpdates
+
 #Join Domain
 Add-Computer -DomainName Domain.com -Credential DOMAIN\Administrator -Reboot 
 
