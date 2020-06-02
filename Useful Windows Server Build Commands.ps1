@@ -45,5 +45,5 @@ Get-DnsServerZone -ZoneName "domain.com" | Get-DnsServerResourceRecord
 Add-DnsServerResourceRecordA -Name "server101" -ZoneName "domain.com" -AllowUpdateAny -IPv4Address "172.16.0.101" -TimeToLive 01:00:00
 Remove-DnsServerResourceRecord -ZoneName "domain.com" -RRType "A" -Name "server101" -RecordData "172.16.0.101"
 #Reverse
-Add-DnsServerPrimaryZone -NetworkId "172.16.00/24" -ReplicationScope "Forest"
-Add-DnsServerResourceRecordA -Name "101" "0.16.172.in-addr.arpa" -AllowUpdateAny -TimeToLive 01:00:00 -AgeRecord -PtrDomainName "server101.domain.com"
+Add-DnsServerPrimaryZone -NetworkId "172.16.0/24" -ReplicationScope "Forest"
+Add-DnsServerResourceRecordPtr -Name "101" "0.16.172.in-addr.arpa" -AllowUpdateAny -TimeToLive 01:00:00 -AgeRecord -PtrDomainName "server101.domain.com"
