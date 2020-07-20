@@ -47,3 +47,7 @@ Remove-DnsServerResourceRecord -ZoneName "domain.com" -RRType "A" -Name "server1
 #Reverse
 Add-DnsServerPrimaryZone -NetworkId "172.16.0/24" -ReplicationScope "Forest"
 Add-DnsServerResourceRecordPtr -Name "101" "0.16.172.in-addr.arpa" -AllowUpdateAny -TimeToLive 01:00:00 -AgeRecord -PtrDomainName "server101.domain.com"
+
+
+#Create Users
+New-ADUser -Name "Dave Q" -GivenName "Dave" -Surname "Q" -SamAccountName "dave" -UserPrincipalName "dave@domain.com" -Path "OU=Users,DC=domain,DC=com" -AccountPassword(Read-Host -AsSecureString "Type User Password") -Enabled $true
