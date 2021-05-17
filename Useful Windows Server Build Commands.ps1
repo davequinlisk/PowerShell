@@ -51,3 +51,7 @@ Add-DnsServerResourceRecordPtr -Name "101" "0.16.172.in-addr.arpa" -AllowUpdateA
 
 #Create Users
 New-ADUser -Name "Dave Q" -GivenName "Dave" -Surname "Q" -SamAccountName "dave" -UserPrincipalName "dave@domain.com" -Path "OU=Users,DC=domain,DC=com" -AccountPassword(Read-Host -AsSecureString "Type User Password") -Enabled $true
+
+#CLI/PS File Transfer
+Invoke-WebRequest -Uri "https://site.com/file.msi" -OutFile "c:\File.msi"
+Start-BitsTransfer -Source "https://site.com/file.msi" -Destination "c:\File.msi"
