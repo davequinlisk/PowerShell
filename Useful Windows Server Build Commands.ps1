@@ -26,6 +26,7 @@ Set-Item wsman:\localhost\client\trustedhosts *
 Install-WindowsFeature AD-Domain-Services
 Install-WindowsFeature DNS
 
+
 #Configure AD DS
 Install-ADDSForest
 -DatabasePath “C:\Windows\NTDS”
@@ -48,9 +49,22 @@ Remove-DnsServerResourceRecord -ZoneName "domain.com" -RRType "A" -Name "server1
 Add-DnsServerPrimaryZone -NetworkId "172.16.0/24" -ReplicationScope "Forest"
 Add-DnsServerResourceRecordPtr -Name "101" "0.16.172.in-addr.arpa" -AllowUpdateAny -TimeToLive 01:00:00 -AgeRecord -PtrDomainName "server101.domain.com"
 
+#Configure DHCP Server
+Install-WindowsFeature DHCP
+netsh dhcp add securitygroups
+Restart-Service dhcpserver
+Add-DhcpServerInDC -DnsName dhcpserver1.domain.com -IPAddress 172.16.0.1
+Set-DhcpServerv4DnsSetting -ComputerName "dhcpserver1.domain.com" -DynamicUpdates "Always" -DeleteDnsRRonLeaseExpiry $True
+
+#DHCP Server - Add Scope
+Add-DhcpServerv4Scope -name "NetworkName" -StartRange 172.16.0.1 -EndRange 172.16.0.254 -SubnetMask 255.255.255.0 -State Active
+Add-DhcpServerv4ExclusionRange -ScopeID 172.16.0.0 -StartRange 172.16.0.1 -EndRange 172.16.0.150
+Add-DhcpServerv4ExclusionRange -ScopeID 172.16.0.0 -StartRange 172.16.0.200 -EndRange 172.16.0.254
+Set-DhcpServerv4OptionValue -OptionID 3 -Value 172.16.0.254 -ScopeID 172.16.0.0 -ComputerName dhcpserver1.domain.com
+Set-DhcpServerv4OptionValue -DnsDomain domain.com -DnsServer 172.16.0.1
 
 #Create Users
-New-ADUser -Name "Dave Q" -GivenName "Dave" -Surname "Q" -SamAccountName "dave" -UserPrincipalName "dave@domain.com" -Path "OU=Users,DC=domain,DC=com" -AccountPassword(Read-Host -AsSecureString "Type User Password") -Enabled $true
+New-ADUser -Name "David Q" -GivenName "David" -Surname "Q" -SamAccountName "dave" -UserPrincipalName "david@domain.com" -Path "OU=Users,DC=domain,DC=com" -AccountPassword(Read-Host -AsSecureString "Type User Password") -Enabled $true
 
 #CLI/PS File Transfer
 Invoke-WebRequest -Uri "https://site.com/file.msi" -OutFile "c:\File.msi"
