@@ -1,0 +1,43 @@
+using namespace System.Net
+
+# Input bindings are passed in via param block.
+param($Request, $TriggerMetadata)
+
+# Interact with query parameters to resolve Monzo API Key
+$auth = $Request.Query.auth
+
+# Retrieve Current Balance
+$account_id = "<ENTER ACCOUNT ID FROM Monzo Developer Website or retrieve via API outside this code>"
+$Header = @{
+        "authorization" = "Bearer $auth"
+    }
+
+Try{
+    $jsonOutput = Invoke-RestMethod -Uri https://api.monzo.com/balance?account_id=$account_id -Headers $Header
+    
+    # Interact with query parameters or the body of the request.
+    $balance = "£" + $jsonOutput.balance/100
+    $appIcon = 15490
+} Catch {
+    # Write to the Azure Functions log stream if error occurs.
+    Write-Host "Message: [$($_.Exception.Message)"] -ForegroundColor Red
+    $balance = $_.Exception.Response.StatusCode
+    $appIcon = 555
+}
+
+# Output Balance to the Azure Functions log stream.
+Write-Host "Current Balance is:" $balance
+
+# Format JSON
+$JSONBody = new-object psobject
+$frames = @(
+    @{text = $balance; icon = $appIcon; index = 0;}
+)
+$JSONBody | Add-Member -MemberType NoteProperty -Name 'frames' -Value $frames -Force
+$body = $JSONBody | ConvertTo-Json -Depth 3
+
+# Associate values to output bindings by calling 'Push-OutputBinding'.
+Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
+    StatusCode = [HttpStatusCode]::OK
+    Body = $body
+})
