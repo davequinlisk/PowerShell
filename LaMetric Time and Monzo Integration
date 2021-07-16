@@ -3,19 +3,18 @@ using namespace System.Net
 # Input bindings are passed in via param block.
 param($Request, $TriggerMetadata)
 
-# Interact with query parameters to resolve Monzo API Key
+# Retrieve Monzo API Bearer Token from query parameters.  (Token is defined by the end user in the LaMetric Time App)
 $auth = $Request.Query.auth
 
-# Retrieve Current Balance
-$account_id = "<ENTER ACCOUNT ID FROM Monzo Developer Website or retrieve via API outside this code>"
-$Header = @{
-        "authorization" = "Bearer $auth"
-    }
+# Access Monzo API to retrieve retrieve Current Balance of the Account.
+# Monzo API | Define HTTP API Header
+$Header = @{"authorization" = "Bearer $auth"}
 
+# Monzo API | Retrieve account ID from the first account returned and use to retrieve balance of that account..
 Try{
+    $jsonOutput = Invoke-RestMethod -Uri https://api.monzo.com/accounts -Headers $Header
+    $account_id = $jsonOutput.accounts[0].id
     $jsonOutput = Invoke-RestMethod -Uri https://api.monzo.com/balance?account_id=$account_id -Headers $Header
-    
-    # Interact with query parameters or the body of the request.
     $balance = "£" + $jsonOutput.balance/100
     $appIcon = 15490
 } Catch {
@@ -25,10 +24,7 @@ Try{
     $appIcon = 555
 }
 
-# Output Balance to the Azure Functions log stream.
-Write-Host "Current Balance is:" $balance
-
-# Format JSON
+# Format JSON in format suitable for LaMetric Time.
 $JSONBody = new-object psobject
 $frames = @(
     @{text = $balance; icon = $appIcon; index = 0;}
